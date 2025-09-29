@@ -268,7 +268,7 @@ def eclipse_phase(P, a, R_star, R_planet, i, e, omega, b):
 
     # t_eclipse = total_eclipse_duration(P, a, R_star, R_planet, i, e, omega, b)
 
-    t_eclipse = total_transit_duration(P, a, R_star, R_planet, i, e, omega, b)
+    t_eclipse = flat_transit_duration(P, a, R_star, R_planet, i, e, omega, b)
 
     phase_eclipse_start = 1-t_eclipse/(2*P)
     phase_eclipse_end = t_eclipse/(2*P)
@@ -276,7 +276,7 @@ def eclipse_phase(P, a, R_star, R_planet, i, e, omega, b):
     return phase_eclipse_start, phase_eclipse_end
 
 
-def eclipse(P, a, R_star, R_planet, i, phase, e, omega, b):
+def eclipse(P, a, R_star, R_planet, i, phase, e, omega, b, t):
     """
     Determines if an exoplanet is in eclipse or not at a given phase.
 
@@ -311,17 +311,77 @@ def eclipse(P, a, R_star, R_planet, i, phase, e, omega, b):
     :rtype: bool
     """
 
-    phase_eclipse_start, phase_eclipse_end = eclipse_phase(P, a, R_star, R_planet, i, e, omega, b)
+    t_eclipse = flat_transit_duration(P, a, R_star, R_planet, i, e, omega, b)
+
+    return phase(t, P) > 1 - phase(t_eclipse/2, P)
+
+    """t_eclipse = total_transit_duration(P, a, R_star, R_planet, i, e, omega, b)
+
+    return phase > 1 - t_eclipse/(2*P)"""
+
+def transit(P, a, R_star, R_planet, i, phase, e, omega, b):
+    """
+    Determines if an exoplanet is in transit or not at a given phase.
+
+    :param P: the orbital period (in s)
+    :type P: float
+
+    :param a: the semimajor axis (in m)
+    :type a: float
+
+    :param R_star: the radius of the star (in m)
+    :type R_star: float
+
+    :param R_planet: the radius of the planet (in m)
+    :type R_planet: float
+
+    :param i: the inclination (in rad)
+    :type i: float
+
+    :param phase: the phase of the exoplanet (in rad)
+    :type phase: float
+
+    :param e: the eccentricity
+    :type e: float
+
+    :param omega: the argument of pericentre (in rad)
+    :type omega: float
+
+    :param b: the impact parameter
+    :type b: float
+
+    :return: in_eclipse
+    :rtype: bool
+    """
+
+    """phase_eclipse_start, phase_eclipse_end = eclipse_phase(P, a, R_star, R_planet, i, e, omega, b)
 
     # in_eclipse = (phase_eclipse_start < phase-np.trunc(phase)) + (phase-np.trunc(phase) < phase_eclipse_end)
 
-    in_eclipse = (phase_eclipse_start < phase-np.trunc(phase)) + (phase-np.trunc(phase) < phase_eclipse_end)
+    phase_transit_start = 1/4 - phase_eclipse_end 
+    if phase_transit_start > 1 :
+        phase_transit_start -= 1
+    phase_transit_end = 1/4 + phase_eclipse_end 
+    if phase_transit_end > 1 :
+        phase_transit_end -= 1
 
-    return in_eclipse
+    print(phase_transit_start, phase_transit_end)
+
+    in_transit = (phase_transit_start < phase-np.trunc(phase)) + (phase-np.trunc(phase) < phase_transit_end)
+
+    print(in_transit)
+    print(np.where(in_transit == False))
+
+    return in_transit"""
+
+    t_eclipse = total_transit_duration(P, a, R_star, R_planet, i, e, omega, b)
+
+    return phase < t_eclipse/(2*P)
+
 
 
 def main():
-    print("TRAPPIST-1b")
+    """print("TRAPPIST-1b")
     # phase_b = np.array([0, 0.25, 0.5, 0.75, 1])
     phase_b = np.linspace(0,1,10001,endpoint=True)
     b_b = eclipse_impact_parameter(a_b, i_b, e_b, R_star, omega_b)
@@ -340,7 +400,7 @@ def main():
     while k < len(phase_b):
         if eclipse(P_b*24*3600, a_b, R_star, R_b, i_b, phase_b[k], e_b, omega_b, b_b) == True:
             print(phase_b[k])
-        k += 1
+        k += 1"""
 
     # print("TRAPPIST-1c")
     # phase_c = np.array([0, 0.25, 0.5, 0.75, 1])

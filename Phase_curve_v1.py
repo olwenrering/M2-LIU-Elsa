@@ -8,7 +8,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from Orbital_motion import compute_true_anomaly
-from Transits import eclipse, eclipse_impact_parameter
+from Transits import eclipse, eclipse_impact_parameter, transit, transit_depth
 from TRAPPIST1_parameters import *
 from Solar_System_constants import *
 from astropy.modeling.models import BlackBody
@@ -66,7 +66,7 @@ def phase_planet(t,P,t0=0):
     :rtype: float
     """
 
-    phase = np.sin(((t+t0)/P)*2*np.pi)/2+0.5 # equation 15
+    phase = np.sin(((t+t0)/P)*2*np.pi - np.pi/2)/2+0.5 # equation 15
     return phase
 
 def star_planet_separation(a,e,nu):
@@ -154,7 +154,7 @@ def luminosity_planet_dayside(F_planet,R_planet):
 def luminosity_bb(T, lambda_1, lambda_2):
 
     bb = BlackBody(temperature=T*u.K)
-    wav = np.arange(lambda_1, lambda_2) * u.micron
+    wav = np.arange(lambda_1, lambda_2, 0.05) * u.micron
     flux = bb(wav)
     return np.trapezoid(flux)
 
@@ -184,9 +184,7 @@ def phase_curve(L_star, L_planet, R_star, R_planet, phase_planet, eclipse):
     :rtype: float
     """
     
-    print((L_planet/L_star)*(R_planet/R_star)**2)
-    print((L_planet/L_star)*(R_star/R_planet)**2)
-    curve = (L_planet/L_star)*phase_planet*(R_planet/R_star)**2 * (-1*eclipse+1) + 1  # *10**6 to have in ppm
+    curve = (L_planet/L_star)*phase_planet*(R_planet/R_star)**2 * (-1*eclipse+1) + 1 # *10**6 to have in ppm
     return curve
 
 
@@ -216,7 +214,7 @@ def main():
     #phase = phase_function(alpha)
     # t0_b = omega_b/(2*np.pi)*P_b
     # phase_b = phase_planet(t,P_b,t0_b)
-    phase = phase_TTV(P, t_start, t_end, [P], nb_points)[0]
+    phase = phase_planet(t, P)
     b = eclipse_impact_parameter(a,i,e,R_star,omega)
     eclipsee = eclipse(P,a,R_star,R,i,np.arccos(phase)/(2*np.pi),e,omega,b)
 
@@ -226,7 +224,7 @@ def main():
     flux = flux_planet(flux_starr)
     L = luminosity_planet_dayside(flux,R)
 
-    phase_curvee = phase_curve(L_star,L,R_star,R,phase,eclipsee)
+    """phase_curvee = phase_curve(L_star,L,R_star,R,phase,eclipsee, transit_depth)
     # np.savetxt("Phase_curve_v1_output/phase_curve_b.txt",np.concatenate((t.reshape(nb_points,1),phase_curve_b.reshape(nb_points,1)),axis=1))
     
     # Total signal
@@ -256,7 +254,7 @@ def main():
     plt.legend()
     plt.grid()
     #plt.savefig("Phase_curve_v1_plots/Phase_curves_TRAPPIST1_bolometric.png", bbox_inches='tight')
-    plt.show()
+    plt.show()"""
 
 
 
